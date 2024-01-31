@@ -502,7 +502,7 @@ def load_table_clientes_mongo():
 #Solo se ejecuta los días Lunes
 def fun_branch_load_departaments():
     today = date.today()
-    if today.weekday()==1 :
+    if today.weekday()==0 :
         return "load_departaments"
     else :
         return "load_master_layer"
