@@ -486,7 +486,8 @@ with DAG(
     dag_id="load_project",
     schedule="20 04 * * *", 
     start_date=days_ago(2), 
-    default_args=default_args
+    default_args=default_args,
+    description = 'Dag del proyecto final'
 ) as dag:
     step_start = PythonOperator(
         task_id='step_start_id',
@@ -494,7 +495,7 @@ with DAG(
         dag=dag
     )
     step_load_orders = PythonOperator(
-        task_id='load_orders_id',
+        task_id='load_orders',
         python_callable=load_orders,
         dag=dag
     )
