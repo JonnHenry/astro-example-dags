@@ -39,6 +39,9 @@ def get_connect_mongo_owner():
     client = MongoClient(mongo_connection)
     return client
 
+def get_bigquery_client():
+    return bigquery.Client(project="focus-ensign-285500.dep_raw.orders")
+
 #Funciones utilitarias para la carga de datos
 def start_process():
     print(" INICIO EL PROCESO!")
@@ -74,7 +77,7 @@ def get_exchangue_value():
 #Funciones para la carga de datos
 def load_orders():
     print(f" INICIO LOAD ORDERS")
-    client = bigquery.Client()
+    client = get_bigquery_client()
     query_string = """
     drop table if exists `focus-ensign-285500.dep_raw.orders` ;
     """
@@ -92,7 +95,7 @@ def load_orders():
     orders_rows=len(orders_df)
     print(f" Se obtuvo  {orders_rows}  Filas de Orders")
     if orders_rows>0 :
-        client = bigquery.Client()
+        client = get_bigquery_client()
 
         table_id =  "focus-ensign-285500.dep_raw.orders"
         job_config = bigquery.LoadJobConfig(
@@ -124,7 +127,7 @@ def load_orders():
 
 def load_order_items():
     print(f" INICIO LOAD ORDER ITEMS")
-    client = bigquery.Client()
+    client = get_bigquery_client()
     query_string = """
     drop table if exists `focus-ensign-285500.dep_raw.order_items` ;
     """
@@ -142,7 +145,7 @@ def load_order_items():
     order_items_rows=len(order_items_df)
     print(f" Se obtuvo  {order_items_rows}  Filas de Orders Items")
     if order_items_rows>0 :
-        client = bigquery.Client()
+        client = get_bigquery_client()
 
         table_id =  "focus-ensign-285500.dep_raw.order_items"
         job_config = bigquery.LoadJobConfig(
@@ -189,7 +192,7 @@ def load_products():
     print(f" Se obtuvo  {products_rows}  Filas")
     products_rows=len(products_df)
     if products_rows>0 :
-        client = bigquery.Client(project='premium-guide-410714')
+        client = get_bigquery_client()
         table_id =  "focus-ensign-285500.dep_raw.products"
         job_config = bigquery.LoadJobConfig(
             schema=[
@@ -232,7 +235,7 @@ def load_customers():
     customers_rows=len(customers_df)
     print(f" Se obtuvo  {customers_rows}  Filas de Customers")
     if customers_rows>0 :
-        client = bigquery.Client()
+        client = get_bigquery_client()
 
         table_id =  "focus-ensign-285500.dep_raw.customers"
         job_config = bigquery.LoadJobConfig(
@@ -278,7 +281,7 @@ def load_categories():
     categories_rows=len(categories_df)
     print(f" Se obtuvo  {categories_rows}  Filas de Categories")
     if categories_rows>0 :
-        client = bigquery.Client()
+        client = get_bigquery_client()
 
         table_id =  "focus-ensign-285500.dep_raw.categories"
         job_config = bigquery.LoadJobConfig(
@@ -319,7 +322,7 @@ def load_departaments():
     departments_rows=len(departments_df)
     print(f" Se obtuvo  {departments_rows}  Filas de Departaments")
     if departments_rows>0 :
-        client = bigquery.Client()
+        client = get_bigquery_client()
 
         table_id =  "focus-ensign-285500.dep_raw.departments"
         job_config = bigquery.LoadJobConfig(
@@ -349,12 +352,12 @@ def load_departaments():
 #Cagando la capa master
 def load_master_layer():
     print(f" INICIO LOAD MASTER LAYER")
-    client = bigquery.Client()
+    client = get_bigquery_client()
     sql = """
         SELECT * FROM `focus-ensign-285500.dep_raw.order_items`
     """
     m_order_items_df = client.query(sql).to_dataframe()
-    client = bigquery.Client()
+    client = get_bigquery_client()
     sql_2 = """
         SELECT *
         FROM `focus-ensign-285500.dep_raw.orders`
@@ -373,7 +376,7 @@ def load_master_layer():
     df_master['order_item_subtotal_mn'] = df_master['order_item_subtotal']*valor_cambio
     df_master_rows=len(df_master)
     if df_master_rows>0 :
-        client = bigquery.Client()
+        client = get_bigquery_client()
 
         table_id =  "focus-ensign-285500.dep_raw.master_order"
         job_config = bigquery.LoadJobConfig(
@@ -412,7 +415,7 @@ def load_master_layer():
 #Se crea la tabla bi_orders
 def create_bi_table_orders():
     print(f" INICIO CREATE OR REPLACE BI TABLE ORDERS")
-    client = bigquery.Client()
+    client = get_bigquery_client()
     query_string = """
     create or replace table `focus-ensign-285500.dep_raw.bi_orders` as
     SELECT 
@@ -434,7 +437,7 @@ def create_bi_table_orders():
 #Se crea la tabla bi_clientes
 def create_bi_table_clientes():
     print(f" INICIO CREATE OR REPLACE BI TABLE CLIENTES")
-    lient = bigquery.Client()
+    client = get_bigquery_client()
     query_string = """
     create or replace table `focus-ensign-285500.dep_raw.bi_clientes` as
     select customer_id,category_name , order_item_subtotal from
@@ -465,7 +468,7 @@ def create_bi_table_clientes():
 #Cargar la tabla de segmento de clientes de bigquery a su  MongoDB personal
 def load_table_clientes_mongo():
     print(f" INICIO LOAD TABLE CLIENTES")
-    client = bigquery.Client()
+    client = get_bigquery_client()
     sql_clientes = """
         SELECT *
         FROM `focus-ensign-285500.dep_raw.bi_clientes`
