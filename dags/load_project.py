@@ -1,10 +1,7 @@
 from airflow import DAG
-from airflow.operators.python import PythonOperator
-from airflow.models.connection import Connection
-from time import time_ns
-from datetime import datetime , timedelta
+from airflow.operators.python import PythonOperator,BranchPythonOperator 
+from datetime import date , timedelta
 from airflow.utils.dates import days_ago
-import os
 from pymongo import MongoClient
 from pandas import DataFrame
 from google.cloud import bigquery
@@ -502,6 +499,14 @@ def load_table_clientes_mongo():
     print(f" FINALIZO LOAD TABLE CLIENTES")
 
 
+#Solo se ejecuta los días Lunes
+def fun_branch_load_departaments():
+    today = date.today()
+    if today.weekday()==1 :
+        return "load_departaments"
+    else :
+        return "load_master_layer"
+
 with DAG(
     dag_id="load_project",
     schedule="20 04 * * *", 
@@ -539,9 +544,10 @@ with DAG(
         python_callable=load_categories,
         dag=dag
     )
-    step_load_departaments = PythonOperator(
-        task_id='load_departaments',
-        python_callable=load_departaments,
+    branch_step_load_departaments = BranchPythonOperator( 
+        task_id='branch_load_departaments', 
+        python_callable=fun_branch_load_departaments, 
+        provide_context=True, 
         dag=dag
     )
     step_load_master_layer = PythonOperator(
@@ -575,5 +581,5 @@ with DAG(
     step_start>>step_load_products
     step_start>>step_load_customers
     step_start>>step_load_categories
-    step_start>>step_load_departaments
-    [step_load_orders, step_load_order_items, step_load_products, step_load_customers, step_load_categories, step_load_departaments] >> step_load_master_layer >> step_create_bi_table_orders >> step_create_bi_table_clientes >> step_load_table_clientes_mongo >> step_end
+    step_start>>branch_step_load_departaments
+    [step_load_orders, step_load_order_items, step_load_products, step_load_customers, step_load_categories, branch_step_load_departaments] >> step_load_master_layer >> step_create_bi_table_orders >> step_create_bi_table_clientes >> step_load_table_clientes_mongo >> step_end
