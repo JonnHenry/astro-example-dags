@@ -40,7 +40,7 @@ def get_connect_mongo_owner():
     return client
 
 def get_bigquery_client():
-    return bigquery.Client(project="focus-ensign-285500.dep_raw.orders")
+    return bigquery.Client(project="focus-ensign-285500")
 
 #Funciones utilitarias para la carga de datos
 def start_process():
@@ -123,6 +123,8 @@ def load_orders():
         )
     else : 
         print('alerta no hay registros en la tabla orders')
+    
+    print(f" FINALIZO LOAD ORDERS")
 
 
 def load_order_items():
@@ -177,6 +179,8 @@ def load_order_items():
     else : 
         print('alerta no hay registros en la tabla order_items')
 
+    print(f" FINALIZO LOAD ORDER ITEMS")
+
 
 def load_products():
     print(f" INICIO LOAD PRODUCTS")
@@ -221,6 +225,8 @@ def load_products():
         )
     else : 
         print('alerta no hay registros en la tabla productos')
+    
+    print(f" FINALIZO LOAD PRODUCTS")
 
 
 def load_customers():
@@ -269,6 +275,8 @@ def load_customers():
     else : 
         print('alerta no hay registros en la tabla customers')
 
+    print(f" FINALIZO LOAD CUSTOMERS")
+
 def load_categories():
     print(f" INICIO LOAD CATEGORIES")
     dbconnect = get_connect_mongo()
@@ -307,6 +315,8 @@ def load_categories():
         )
     else : 
         print('alerta no hay registros en la tabla categories')
+
+    print(f" FINALIZO LOAD CATEGORIES")
 
 
 
@@ -347,6 +357,8 @@ def load_departaments():
         )
     else : 
         print('alerta no hay registros en la tabla departments')
+    
+    print(f" FINALIZO LOAD DEPARTAMENTS")
 
 
 #Cagando la capa master
@@ -412,6 +424,8 @@ def load_master_layer():
     else : 
         print('alerta no hay registros en la tabla order_items')
 
+    print(f" FINALIZO LOAD MASTER LAYER")
+
 #Se crea la tabla bi_orders
 def create_bi_table_orders():
     print(f" INICIO CREATE OR REPLACE BI TABLE ORDERS")
@@ -433,6 +447,8 @@ def create_bi_table_orders():
     """
     query_job = client.query(query_string)
     query_job.result()
+
+    print(f" FINALIZO CREATE OR REPLACE BI TABLE ORDERS")
 
 #Se crea la tabla bi_clientes
 def create_bi_table_clientes():
@@ -462,7 +478,7 @@ def create_bi_table_clientes():
     """
     query_job = client.query(query_string)
     rows = list(query_job.result())
-    print(rows)
+    print(f" FINALIZO CREATE OR REPLACE BI TABLE CLIENTES")
 
 
 #Cargar la tabla de segmento de clientes de bigquery a su  MongoDB personal
@@ -483,6 +499,7 @@ def load_table_clientes_mongo():
     data_insert = clientes_df.to_dict(orient='records')
     connection['retail_db']["clientes_bq"].insert_many(data_insert, ordered=False)
     connection.close()
+    print(f" FINALIZO LOAD TABLE CLIENTES")
 
 
 with DAG(
