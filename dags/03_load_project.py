@@ -482,7 +482,6 @@ def load_table_clientes_mongo():
     connection.close()
 
 
-
 with DAG(
     dag_id="load_project",
     schedule="20 04 * * *", 
